@@ -1,3 +1,39 @@
-canvas:hover {
+canvas#canvas:hover {
     cursor: crosshair;
+}
+
+.container .page-header h1 small {
+	font-size: .5em;
+}
+
+.container .page-header h1 small.author {
+	color: black;
+	float: right;
+}
+
+.panel-info {
+	border-color: gray;
+}
+
+.panel-info>.panel-heading {
+	background-color: lightgray;
+	color: black;
+	border-color: gray;
+}
+
+.btn-longer {
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+#nbr-save {
+	opacity: 0;
+}
+
+div.row>div.col-md-12>div.form-group {
+	margin-bottom: 0;
+}
+
+.list-group-item:hover {
+	background-color: lightgray;
 }

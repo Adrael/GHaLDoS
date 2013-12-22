@@ -8,7 +8,16 @@
     <body>
         <div class="container">
             <div class="page-header">
-                <h1>Perceptron <small>projet IA</small></h1>
+                <h1>
+                	<small class="subtitle">AI Project</small>
+                	<br/>
+                	GHaLDoS &mdash; Perceptron 2.0
+                	<small class="author">
+                		Damien GABRIELLE
+                		<br/>
+                		Rapha&euml;l MARQUES
+                	</small>
+                </h1>
             </div>
             <div class="row" role="main">
                 <form role="form">
@@ -20,19 +29,19 @@
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col-md-12 text-center">
-                                        <canvas id="canvas" width="300" height="400">alternate content</canvas>
+                                        <canvas id="canvas" width="300" height="353">alternate content</canvas>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-12 text-center">
                                         <div class="form-group">
-                                            <button type="button" id="resetCanvas" class="btn btn-danger btn-sm">Reset <span class="glyphicon glyphicon-trash"></span></button>
+                                            <button type="button" id="resetCanvas" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span> Clear</button>
                                             <div class="btn-group" data-toggle="buttons" id="pen_mode">
                                                 <label class="btn btn-default btn-sm active">
-                                                    <input type="radio" name="canvas_mode" id="pen_write" checked="checked">Write <span class="glyphicon glyphicon-pencil"></span>
+                                                    <input type="radio" name="canvas_mode" id="pen_write" checked="checked"><span class="glyphicon glyphicon-pencil"></span> Write
                                                 </label>
                                                 <label class="btn btn-default btn-sm">
-                                                    <input type="radio" name="canvas_mode" id="pen_erase">Erase <span class="glyphicon glyphicon-thumbs-down"></span>
+                                                    <input type="radio" name="canvas_mode" id="pen_erase"><span class="glyphicon glyphicon-asterisk"></span> Erase
                                                 </label>
                                             </div>
                                         </div>
@@ -52,7 +61,7 @@
                                         <input type="text" id="inputNumber" class="form-control input-sm">
                                         <span class="input-group-btn">
                                             <button class="btn btn-primary btn-sm" type="button" id="learnClicked">Learn</button>
-                                            <button class="btn btn-success btn-sm" type="button" id="saveNumberClicked"><span class="glyphicon glyphicon-floppy-save"></span></button>
+                                            <button class="btn btn-success btn-sm" type="button" id="saveNumberClicked" title="Save to self-train later"><span class="glyphicon glyphicon-floppy-save"></span></button>
                                         </span>
                                     </div>
                                 </div>
@@ -60,7 +69,7 @@
                                     <div class="input-group">
                                         <input type="text" id="outputNumber" class="form-control input-sm">
                                         <span class="input-group-btn">
-                                            <button class="btn btn-primary btn-sm" type="button" id="processClicked">Process</button>
+                                            <button class="btn btn-primary btn-longer btn-sm" type="button" id="processClicked">Process</button>
                                         </span>
                                     </div>
                                 </div>
@@ -92,8 +101,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" id="learnAllElements" class="btn btn-success btn-sm">Auto training</button>
-                                <button type="button" id="resetPerceptron" class="btn btn-danger btn-sm">Reset perceptron</button><br>
+                                <button type="button" id="learnAllElements" class="btn btn-success btn-sm"><span class="glyphicon glyphicon-repeat"></span> Self-training</button>
+                                <button type="button" id="resetPerceptron" class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span> Reset data</button><br>
                             </div>
                         </div>
                     </div>

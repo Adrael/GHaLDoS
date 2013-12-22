@@ -190,9 +190,15 @@ Perceptron.prototype.updateGraphic = function() {
  *	@param {} none
  */
 Perceptron.prototype.learnClicked = function() {
-    var learnedNumber = parseInt($("#inputNumber").val());
-    this.learn(learnedNumber);
-    this.processClicked();
+	var component = document.getElementById("inputNumber");
+
+    if(component.value.length === 0) {
+    	alert("You have to enter a number first!");
+    } else {
+    	var learnedNumber = parseInt(component.value);
+	    this.learn(learnedNumber);
+	    this.processClicked();
+	}
 }
 
 /**
@@ -202,21 +208,27 @@ Perceptron.prototype.learnClicked = function() {
  */
 Perceptron.prototype.saveNumberClicked = function() {
 
-    var learnedNumber = parseInt($("#inputNumber").val());
+	var component = document.getElementById("inputNumber");
 
-    if (learnedNumber >= 0 && learnedNumber < this.OUTPUT_COUNT) {
-        this.learnedNumbers[this.SAVE_ID] = [];
-        this.learnedNumbers[this.SAVE_ID]['table'] = [];
-        this.learnedNumbers[this.SAVE_ID]['number'] = learnedNumber;
-        for (var x = 0; x < this.GRID_WIDTH; x++) {
-            this.learnedNumbers[this.SAVE_ID]['table'][x] = [];
-            for (var y = 0; y < this.GRID_HEIGHT;y++) {
-                this.learnedNumbers[this.SAVE_ID]['table'][x][y] = this.pixels[x][y];
-            }
-        }
-        this.refreshList(learnedNumber, this.SAVE_ID);
-        this.SAVE_ID++;
-    }
+	if(component.value.length === 0) {
+    	alert("You have to enter a number first!");
+    } else {
+    	var learnedNumber = parseInt(component.value);
+
+	    if (learnedNumber >= 0 && learnedNumber < this.OUTPUT_COUNT) {
+	        this.learnedNumbers[this.SAVE_ID] = [];
+	        this.learnedNumbers[this.SAVE_ID]['table'] = [];
+	        this.learnedNumbers[this.SAVE_ID]['number'] = learnedNumber;
+	        for (var x = 0; x < this.GRID_WIDTH; x++) {
+	            this.learnedNumbers[this.SAVE_ID]['table'][x] = [];
+	            for (var y = 0; y < this.GRID_HEIGHT;y++) {
+	                this.learnedNumbers[this.SAVE_ID]['table'][x][y] = this.pixels[x][y];
+	            }
+	        }
+	        this.refreshList(learnedNumber, this.SAVE_ID);
+	        this.SAVE_ID++;
+    	}
+	}
 }
 
 /**
@@ -243,8 +255,9 @@ Perceptron.prototype.refreshList = function(learnedNumber, id) {
     button.onclick = function(e) {
         self.learnedNumbers[id] = [];
         document.getElementById('save_' + id).remove();
-        var nbr = document.getElementById('listOfNumbers').childNodes.length;
-        document.getElementById('nbr-save').innerHTML = "" + nbr;
+
+        self.updateListCount();
+
         e.stopPropagation();
     };
 
@@ -264,6 +277,7 @@ Perceptron.prototype.refreshList = function(learnedNumber, id) {
     element_liste.setAttribute('data-number-save', learnedNumber);
     element_liste.setAttribute('data-id-save', id);
     element_liste.className = 'list-group-item';
+    element_liste.style.cursor = "pointer";
     element_liste.appendChild(div_row);
     element_liste.onclick = function() {
         self.pixels = [];
@@ -278,8 +292,25 @@ Perceptron.prototype.refreshList = function(learnedNumber, id) {
     };
 
     document.getElementById('listOfNumbers').appendChild(element_liste);
-    var nbr = document.getElementById('listOfNumbers').childNodes.length;
-    document.getElementById('nbr-save').innerHTML = "" + nbr;
+    this.updateListCount();
+}
+
+/**
+ *	Updates the list count near the list title
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.updateListCount = function() {
+	var nbr = document.getElementById('listOfNumbers').childNodes.length;
+    var component = document.getElementById('nbr-save');
+
+        if(nbr < 1) {
+        	component.style.opacity = 0;
+        }
+        else {
+        	component.style.opacity = 1;
+        	component.innerHTML = "" + nbr;
+        }
 }
 
 /**
@@ -289,16 +320,20 @@ Perceptron.prototype.refreshList = function(learnedNumber, id) {
  */
 Perceptron.prototype.processClicked = function() {
 
-    var processedNumbers = [];
+	if(this.activation.length === 0) {
+		alert("You have to learn a number in a first place!");
+	} else {
+	    var processedNumbers = [];
 
-    this.process();
+	    this.process();
 
-    for (var i = 0; i < this.OUTPUT_COUNT; i++) {
-        if (this.activation[i] >= this.ACTIVATION_THRESHOLD)
-            processedNumbers.push(i);
-    }
+	    for (var i = 0; i < this.OUTPUT_COUNT; i++) {
+	        if (this.activation[i] >= this.ACTIVATION_THRESHOLD)
+	            processedNumbers.push(i);
+	    }
 
-    this.showProcessedNumbers(processedNumbers);
+	    this.showProcessedNumbers(processedNumbers);
+	}
 }
 
 /**
