@@ -1,112 +1,142 @@
-var PIXEL_SIZE = 15; //pixels
+/*!
+ * perceptron.js
+ * https://github.com/Adrael/GHaLDoS/blob/master/perceptron.js
+ * 
+ *
+ * Copyright (C) 2013
+ */
 
-var GRID_WIDTH = 0;
-var GRID_HEIGHT = 0;
+ 'use strict';
 
-var OUTPUT_COUNT = 10;
-var THICKNESS = 4;
+/**
+ *	Constructor for Perceptron
+ * 
+ *	@param {} none
+ */
+function Perceptron() {
 
-var ACTIVATION_THRESHOLD = 0.8;
-var LEARNING = 0.001;
+	this.PIXEL_SIZE 		  = 15;		// Size of a canvas pixel in screen's pixels
+	this.GRID_WIDTH 		  = 0;		// 
+	this.GRID_HEIGHT 		  = 0;		// 
+	this.OUTPUT_COUNT 		  = 10;		// Numbers that are recognized by the perceptron, starting at 0
+	this.THICKNESS 			  = 4;		// 
+	this.ACTIVATION_THRESHOLD = 0.8;	// The threshold the perceptron is activated with
+	this.LEARNING 			  = 0.001;	// 
+	this.SAVE_ID 			  = 0;		// 
 
-var SAVE_ID = 0;
+	// Data arrays
+	this.pixels 		= [];
+	this.learnedNumbers = [];
+	this.neuralNetwork  = [];
+	this.activation 	= [];
 
-var pixels = [];
+	// Mouse controls
+	this.mousePressed 	 = false;
+	this.mousePixelIndex = -1;
 
-var learnedNumbers = [];
+	// The chart that is displayed at the bottom showing the results
+	this.graphicsChart = undefined;
+}
 
-var neuralNetwork = [];
-var activation = [];
+/**
+ *	Iniatializes the objects that are needed
+ *	for the perceptron to work
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.initialize = function() {
 
-var mousePressed = false;
-var mousePixelIndex = -1;
+    var canvas 		 = document.getElementById("canvas");
+    this.GRID_WIDTH  = Math.floor(canvas.width  / this.PIXEL_SIZE);
+    this.GRID_HEIGHT = Math.floor(canvas.height / this.PIXEL_SIZE);
+    var nbr_pixel    = this.GRID_HEIGHT * this.GRID_WIDTH;
 
-var graphicsChart;
+    this.LEARNING = 5 / nbr_pixel;
+    this.ACTIVATION_THRESHOLD = 0.6;
+    this.THICKNESS = Math.floor(this.GRID_WIDTH / 20) > 1 ? Math.floor(this.GRID_WIDTH / 20) : 1;
 
-function init() {
+    this.resetCanvas();
 
-    var canvas = document.getElementById("canvas");
-    GRID_WIDTH = Math.floor(canvas.width/PIXEL_SIZE);
-    GRID_HEIGHT = Math.floor(canvas.height/PIXEL_SIZE);
-    var nbr_pixel = GRID_HEIGHT * GRID_WIDTH;
-
-    LEARNING = 5 / nbr_pixel;
-    ACTIVATION_THRESHOLD = 0.6;
-    THICKNESS = Math.floor(GRID_WIDTH / 20) > 1 ? Math.floor(GRID_WIDTH / 20) : 1;
-
-    resetCanvas();
-
-    /* Création du réseau de neurones */
     for (var x = 0; x < nbr_pixel; x++) {
-        neuralNetwork[x] = [];
-        for (var y = 0; y < OUTPUT_COUNT; y++) {
-            neuralNetwork[x][y] = 0.0;
+        this.neuralNetwork[x] = [];
+        for (var y = 0; y < this.OUTPUT_COUNT; y++) {
+            this.neuralNetwork[x][y] = 0.0;
         }
     }
 
+    var self = this;
+
     canvas.addEventListener("click", function(e) {
-        var mousePoint = mouseCanvasPosition(e);
-        setPixelValueAtPoint(mousePoint);
-        drawPixels();
+        var mousePoint = self.mouseCanvasPosition(e);
+        self.setPixelValueAtPoint(mousePoint);
+        self.drawPixels();
     });
 
     canvas.addEventListener("mousedown", function() {
-        mousePressed = true;
+        self.mousePressed = true;
     }, false);
+
     canvas.addEventListener("mouseup", function() {
-        mousePressed = false;
+        self.mousePressed = false;
     }, false);
 
     canvas.addEventListener("mousemove", function(e) {
-        if(mousePressed) {
-            var mousePoint = mouseCanvasPosition(e);
-            var pixelIndex = pixelIndexAtPoint(mousePoint);
-            if(pixelIndex != mousePixelIndex) {
-                setPixelValueAtPoint(mousePoint);
-                drawPixels();
-                mousePixelIndex = pixelIndex;
+        if(self.mousePressed) {
+            var mousePoint = self.mouseCanvasPosition(e);
+            var pixelIndex = self.pixelIndexAtPoint(mousePoint);
+            if(pixelIndex != self.mousePixelIndex) {
+                self.setPixelValueAtPoint(mousePoint);
+                self.drawPixels();
+                self.mousePixelIndex = pixelIndex;
             }
         }
     });
 
+    document.getElementById("resetCanvas").onclick  = function() {self.resetCanvas();};
+    document.getElementById("learnClicked").onclick	 = function() {self.learnClicked();};
+    document.getElementById("processClicked").onclick = function() {self.processClicked();};
+    document.getElementById("resetPerceptron").onclick = function() {self.resetPerceptron();};
+    document.getElementById("learnAllElements").onclick = function() {self.learnAllElements();};
+    document.getElementById("saveNumberClicked").onclick = function() {self.saveNumberClicked();};
+
     var activationSlider = document.getElementById('activation_slider');
-    var trainingSlider = document.getElementById('training_slider');
-    var thicknessSlider = document.getElementById('thickness_slider');
+    var trainingSlider   = document.getElementById('training_slider');
+    var thicknessSlider  = document.getElementById('thickness_slider');
 
     activationSlider.min = 0.2;
     activationSlider.max = 1;
     activationSlider.step = 0.05;
-    activationSlider.value = ACTIVATION_THRESHOLD;
+    activationSlider.value = this.ACTIVATION_THRESHOLD;
     activationSlider.onchange = function() {
-        ACTIVATION_THRESHOLD = activationSlider.value;
+        self.ACTIVATION_THRESHOLD = activationSlider.value;
         document.getElementById('activation_display').innerHTML = activationSlider.value;
-        updateGraphic()
+        self.updateGraphic()
     };
 
     trainingSlider.min = 1 / (nbr_pixel);
     trainingSlider.max = 10 / nbr_pixel;
     trainingSlider.step = 1 / (nbr_pixel * 10);
-    trainingSlider.value = LEARNING;
+    trainingSlider.value = this.LEARNING;
     trainingSlider.onchange = function() {
-        LEARNING = trainingSlider.value;
+        self.LEARNING = trainingSlider.value;
         document.getElementById('training_display').innerHTML = trainingSlider.value;
     };
 
     thicknessSlider.min = 0;
-    thicknessSlider.max = Math.ceil(GRID_WIDTH / 10);
+    thicknessSlider.max = Math.ceil(this.GRID_WIDTH / 10);
     thicknessSlider.step = 1;
-    thicknessSlider.value = THICKNESS;
+    thicknessSlider.value = this.THICKNESS;
     thicknessSlider.onchange = function() {
-        THICKNESS = thicknessSlider.value;
+        self.THICKNESS = thicknessSlider.value;
         document.getElementById('thickness_display').innerHTML = thicknessSlider.value;
     };
 
-    document.getElementById('activation_display').innerHTML = "" + ACTIVATION_THRESHOLD;
-    document.getElementById('training_display').innerHTML = "" + LEARNING;
-    document.getElementById('thickness_display').innerHTML = "" + THICKNESS;
+    document.getElementById('activation_display').innerHTML = "" + this.ACTIVATION_THRESHOLD;
+    document.getElementById('training_display').innerHTML = "" + this.LEARNING;
+    document.getElementById('thickness_display').innerHTML = "" + this.THICKNESS;
 
     // le graphique
-    graphicsChart = new Highcharts.Chart({
+    this.graphicsChart = new Highcharts.Chart({
         chart: {
             renderTo: 'chartContainer',
             type: 'column'
@@ -123,7 +153,7 @@ function init() {
         yAxis: {
             title: {text: null},
             plotLines: [{
-                value: ACTIVATION_THRESHOLD,
+                value: this.ACTIVATION_THRESHOLD,
                 color: 'rgb(255, 0, 0)',
                 width: 2,
                 id: 'activation_threshold'
@@ -135,47 +165,67 @@ function init() {
     });
 }
 
-function updateGraphic() {
-    graphicsChart.series[0].update({
-        data: activation
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.updateGraphic = function() {
+    this.graphicsChart.series[0].update({
+        data: this.activation
     }, true);
 
-    graphicsChart.yAxis[0].removePlotLine('activation_threshold');
-    graphicsChart.yAxis[0].addPlotLine({
-        value: ACTIVATION_THRESHOLD,
+    this.graphicsChart.yAxis[0].removePlotLine('activation_threshold');
+    this.graphicsChart.yAxis[0].addPlotLine({
+        value: this.ACTIVATION_THRESHOLD,
         color: 'rgb(255, 0, 0)',
         width: 2,
         id: 'activation_threshold'
     });
 }
 
-function learnClicked() {
-
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.learnClicked = function() {
     var learnedNumber = parseInt($("#inputNumber").val());
-    learn(learnedNumber);
-    processClicked();
+    this.learn(learnedNumber);
+    this.processClicked();
 }
 
-function saveNumberClicked() {
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.saveNumberClicked = function() {
 
     var learnedNumber = parseInt($("#inputNumber").val());
 
-    if (learnedNumber >= 0 && learnedNumber < OUTPUT_COUNT) {
-        learnedNumbers[SAVE_ID] = [];
-        learnedNumbers[SAVE_ID]['table'] = [];
-        learnedNumbers[SAVE_ID]['number'] = learnedNumber;
-        for (var x = 0; x < GRID_WIDTH; x++) {
-            learnedNumbers[SAVE_ID]['table'][x] = [];
-            for (var y = 0; y < GRID_HEIGHT;y++) {
-                learnedNumbers[SAVE_ID]['table'][x][y] = pixels[x][y];
+    if (learnedNumber >= 0 && learnedNumber < this.OUTPUT_COUNT) {
+        this.learnedNumbers[this.SAVE_ID] = [];
+        this.learnedNumbers[this.SAVE_ID]['table'] = [];
+        this.learnedNumbers[this.SAVE_ID]['number'] = learnedNumber;
+        for (var x = 0; x < this.GRID_WIDTH; x++) {
+            this.learnedNumbers[this.SAVE_ID]['table'][x] = [];
+            for (var y = 0; y < this.GRID_HEIGHT;y++) {
+                this.learnedNumbers[this.SAVE_ID]['table'][x][y] = this.pixels[x][y];
             }
         }
-        refreshList(learnedNumber, SAVE_ID);
-        SAVE_ID++;
+        this.refreshList(learnedNumber, this.SAVE_ID);
+        this.SAVE_ID++;
     }
 }
 
-function refreshList(learnedNumber, id) {
+/**
+ *	
+ * 
+ *	@param {number} learnedNumber - ...
+ *	@param {number} id - ...
+ */
+Perceptron.prototype.refreshList = function(learnedNumber, id) {
 
     var element_liste = document.createElement('div');
     var div_row = document.createElement('div');
@@ -188,8 +238,10 @@ function refreshList(learnedNumber, id) {
 
     button.className = 'btn btn-danger btn-xs';
     button.type = 'button';
+
+    var self = this;
     button.onclick = function(e) {
-        learnedNumbers[id] = [];
+        self.learnedNumbers[id] = [];
         document.getElementById('save_' + id).remove();
         var nbr = document.getElementById('listOfNumbers').childNodes.length;
         document.getElementById('nbr-save').innerHTML = "" + nbr;
@@ -213,16 +265,16 @@ function refreshList(learnedNumber, id) {
     element_liste.setAttribute('data-id-save', id);
     element_liste.className = 'list-group-item';
     element_liste.appendChild(div_row);
-    element_liste.onclick = function () {
-        pixels = [];
-        for (var x = 0; x < GRID_WIDTH; x++) {
-            pixels[x] = [];
-            for (var y = 0; y < GRID_HEIGHT; y++) {
-                pixels[x][y] = learnedNumbers[id]['table'][x][y];
+    element_liste.onclick = function() {
+        self.pixels = [];
+        for (var x = 0; x < self.GRID_WIDTH; x++) {
+            self.pixels[x] = [];
+            for (var y = 0; y < self.GRID_HEIGHT; y++) {
+                self.pixels[x][y] = self.learnedNumbers[id]['table'][x][y];
             }
         }
-        drawPixels();
-        process();
+        self.drawPixels();
+        self.process();
     };
 
     document.getElementById('listOfNumbers').appendChild(element_liste);
@@ -230,30 +282,45 @@ function refreshList(learnedNumber, id) {
     document.getElementById('nbr-save').innerHTML = "" + nbr;
 }
 
-function processClicked() {
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.processClicked = function() {
 
     var processedNumbers = [];
 
-    process();
+    this.process();
 
-    for (var i = 0; i < OUTPUT_COUNT; i++) {
-        if (activation[i] >= ACTIVATION_THRESHOLD)
+    for (var i = 0; i < this.OUTPUT_COUNT; i++) {
+        if (this.activation[i] >= this.ACTIVATION_THRESHOLD)
             processedNumbers.push(i);
     }
 
-    showProcessedNumbers(processedNumbers);
+    this.showProcessedNumbers(processedNumbers);
 }
 
-function changeDataPixel(data) {
-    for (var x = 0; x < GRID_WIDTH; x++) {
-        pixels[x] = [];
-        for (var y = 0; y < GRID_HEIGHT;y++) {
-            pixels[x][y] = data[x][y];
+/**
+ *	
+ * 
+ *	@param {numbers array} data - ....
+ */
+Perceptron.prototype.changeDataPixel = function(data) {
+    for (var x = 0; x < this.GRID_WIDTH; x++) {
+        this.pixels[x] = [];
+        for (var y = 0; y < this.GRID_HEIGHT;y++) {
+            this.pixels[x][y] = data[x][y];
         }
     }
 }
 
-function learnAllElements() {
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.learnAllElements = function() {
 
     var learning_programm = [];
     var list_of_save = document.getElementById('listOfNumbers').childNodes;
@@ -284,19 +351,19 @@ function learnAllElements() {
 
             number = learning_programm[i]['number'];
             id = learning_programm[i]['id'];
-            processedNumbers = [];
-            changeDataPixel(learnedNumbers[id]['table']);
-            process();
+            this.processedNumbers = [];
+            this.changeDataPixel(this.learnedNumbers[id]['table']);
+            this.process();
 
-            for (j = 0; j < OUTPUT_COUNT; j++) {
-                if (activation[j] >= ACTIVATION_THRESHOLD)
-                    processedNumbers.push(j);
+            for (j = 0; j < this.OUTPUT_COUNT; j++) {
+                if (this.activation[j] >= this.ACTIVATION_THRESHOLD)
+                    this.processedNumbers.push(j);
             }
 
-            console.log("apprend le n°" + number + " -  processed = " + processedNumbers[0]);
-            if (processedNumbers.length != 1 || processedNumbers[0] != number) {
+            console.log("apprend le n°" + number + " -  processed = " + this.processedNumbers[0]);
+            if (this.processedNumbers.length != 1 || this.processedNumbers[0] != number) {
                 console.log("no!");
-                learn(number);
+                this.learn(number);
             } else {
                 allCorrect++;
             }
@@ -308,10 +375,15 @@ function learnAllElements() {
     if (infinitLoop > 50)
         console.log("sortie pas boucle infinit!");
 
-    drawPixels();
+   this.drawPixels();
 }
 
-function showProcessedNumbers(processedNumbers) {
+/**
+ *	
+ * 
+ *	@param {numbers array} processedNumbers - ...
+ */
+Perceptron.prototype.showProcessedNumbers = function(processedNumbers) {
     var result = "";
     for(var i = 0; i < processedNumbers.length; i++) {
         result += processedNumbers[i].toString() + ",";
@@ -325,55 +397,66 @@ function showProcessedNumbers(processedNumbers) {
 /**
  * A = somme(E*p) si E > seuil
  * P = P + t*(A-O)*E
- * @param {number} number
+ *
+ * @param {number} number - ...
  */
-function learn(number) {
+Perceptron.prototype.learn = function(number) {
 
     var i, x, posX, posY;
-    var size = GRID_WIDTH * GRID_HEIGHT;
+    var size = this.GRID_WIDTH * this.GRID_HEIGHT;
 
-    process();
+    this.process();
 
-    for (i = 0; i < OUTPUT_COUNT; i++) {
+    for (i = 0; i < this.OUTPUT_COUNT; i++) {
 
         var A = (i == number) ? 1 : 0;
-        var O = (activation[i] >= ACTIVATION_THRESHOLD) ? 1 : 0;
+        var O = (this.activation[i] >= this.ACTIVATION_THRESHOLD) ? 1 : 0;
         var delta = A - O;
 
         for (x = 0; x < size; x++) {
-            posX = x % GRID_WIDTH;
-            posY = Math.floor(x / GRID_WIDTH);
-            var E = pixels[posX][posY];
-            neuralNetwork[x][i] += LEARNING * delta * E;
+            posX = x % this.GRID_WIDTH;
+            posY = Math.floor(x / this.GRID_WIDTH);
+            var E = this.pixels[posX][posY];
+            this.neuralNetwork[x][i] += this.LEARNING * delta * E;
         }
     }
     console.log("learn");
-    process();
+    this.process();
 }
 
-function process() {
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.process = function() {
 
     // les sorties sont initialisées à 0
-    for (var i = 0; i < OUTPUT_COUNT; i++)
-        activation[i] = 0.0;
+    for (var i = 0; i < this.OUTPUT_COUNT; i++)
+        this.activation[i] = 0.0;
 
-    for (var x = 0, size = GRID_HEIGHT * GRID_WIDTH; x < size; x++) {
+    for (var x = 0, size = this.GRID_HEIGHT * this.GRID_WIDTH; x < size; x++) {
 
-        var posX = x % GRID_WIDTH;
-        var posY = Math.floor(x / GRID_WIDTH);
+        var posX = x % this.GRID_WIDTH;
+        var posY = Math.floor(x / this.GRID_WIDTH);
 
-        for (var y = 0; y < OUTPUT_COUNT; y++)
-            activation[y] += neuralNetwork[x][y] * pixels[posX][posY];
+        for (var y = 0; y < this.OUTPUT_COUNT; y++)
+            this.activation[y] += this.neuralNetwork[x][y] * this.pixels[posX][posY];
     }
 
     console.log("process");
-    console.log(activation);
-    updateGraphic();
+    console.log(this.activation);
+    this.updateGraphic();
 }
 
 /* ------  */
 
-function mouseCanvasPosition(e) {
+/**
+ *	
+ * 
+ *	@param {event} e - unused
+ */
+Perceptron.prototype.mouseCanvasPosition = function(e) {
     var rect = canvas.getBoundingClientRect();
     return {
         x: e.clientX - rect.left,
@@ -381,103 +464,134 @@ function mouseCanvasPosition(e) {
     };
 }
 
-function pixelIndexAtPoint(point) {
+/**
+ *	
+ * 
+ *	@param {object} point - ...
+ */
+Perceptron.prototype.pixelIndexAtPoint = function(point) {
     var pixelIndex = -1;
-    var x = Math.floor(point.x/PIXEL_SIZE);
-    var y = Math.floor(point.y/PIXEL_SIZE);
-    if(x < GRID_WIDTH && y < GRID_HEIGHT) {
-        pixelIndex = y * GRID_WIDTH + x;
+    var x = Math.floor(point.x / this.PIXEL_SIZE);
+    var y = Math.floor(point.y / this.PIXEL_SIZE);
+    if(x < this.GRID_WIDTH && y < this.GRID_HEIGHT) {
+        pixelIndex = y * this.GRID_WIDTH + x;
     }
     return pixelIndex;
 }
 
-function setPixelValueAtPoint(point) {
-    var x = Math.floor(point.x/PIXEL_SIZE);
-    var y = Math.floor(point.y/PIXEL_SIZE);
-    if(x < GRID_WIDTH && y < GRID_HEIGHT)
-        drawNeighboursPixels(x, y);
+/**
+ *	
+ * 
+ *	@param {object} point - ...
+ */
+Perceptron.prototype.setPixelValueAtPoint = function(point) {
+    var x = Math.floor(point.x / this.PIXEL_SIZE);
+    var y = Math.floor(point.y / this.PIXEL_SIZE);
+    if(x < this.GRID_WIDTH && y < this.GRID_HEIGHT)
+        this.drawNeighboursPixels(x, y);
 }
 
-function drawNeighboursPixels(x, y) {
+/**
+ *	
+ * 
+ *	@param {number} x - ...
+ *	@param {number} y - ...
+ */
+Perceptron.prototype.drawNeighboursPixels = function(x, y) {
 
     var write_mode = document.getElementById('pen_write').checked;
-    pixels[x][y] = write_mode ? 1.0 : 0.0;
+    this.pixels[x][y] = write_mode ? 1.0 : 0.0;
 
-    for (var x2 = x - THICKNESS, xMax = x + THICKNESS; x2 < xMax; x2++) {
+    for (var x2 = x - this.THICKNESS, xMax = x + this.THICKNESS; x2 < xMax; x2++) {
 
-        if (x2 < 0 || x2 >= pixels.length)
+        if (x2 < 0 || x2 >= this.pixels.length)
             continue;
 
-        for (var y2 = y - THICKNESS, yMax = y + THICKNESS; y2 < yMax; y2++) {
+        for (var y2 = y - this.THICKNESS, yMax = y + this.THICKNESS; y2 < yMax; y2++) {
 
-            if (y2 < 0 || y2 >= pixels[x2].length)
+            if (y2 < 0 || y2 >= this.pixels[x2].length)
                 continue;
 
             var deltaX = x2 - x;
             var deltaY = y2 - y;
             var dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-            if (dist > THICKNESS)
+            if (dist > this.THICKNESS)
                 continue;
 
-            var value = write_mode ? 1.0 - (dist * 0.5 / THICKNESS) : 0.0;
-            var value_pixel = pixels[x2][y2];
+            var value = write_mode ? 1.0 - (dist * 0.5 / this.THICKNESS) : 0.0;
+            var value_pixel = this.pixels[x2][y2];
 
             if (write_mode && value_pixel < value || !write_mode)
-                pixels[x2][y2] = value;
+                this.pixels[x2][y2] = value;
         }
     }
 }
 
-
-function resetCanvas() {
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.resetCanvas = function() {
     document.getElementById('inputNumber').value = "";
-    resetPixels();
-    drawPixels();
+    this.resetPixels();
+    this.drawPixels();
 }
 
-function resetPerceptron() {
-    for (var i = 0, size = GRID_WIDTH * GRID_HEIGHT; i < size; i++) {
-        for (var j = 0; j < OUTPUT_COUNT; j++) {
-            neuralNetwork[i][j] = 0.0;
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.resetPerceptron = function() {
+    for (var i = 0, size = this.GRID_WIDTH * this.GRID_HEIGHT; i < size; i++) {
+        for (var j = 0; j < this.OUTPUT_COUNT; j++) {
+            this.neuralNetwork[i][j] = 0.0;
         }
     }
-    process();
-    updateGraphic();
+    this.process();
+    this.updateGraphic();
 }
 
-function resetPixels() {
-    for(var x = 0; x < GRID_WIDTH; x++) {
-        pixels[x] = [];
-        for(var y = 0; y < GRID_HEIGHT; y++) {
-            pixels[x][y] = 0;
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.resetPixels = function() {
+    for(var x = 0; x < this.GRID_WIDTH; x++) {
+        this.pixels[x] = [];
+        for(var y = 0; y < this.GRID_HEIGHT; y++) {
+            this.pixels[x][y] = 0;
         }
     }
 }
 
-function drawPixels() {
+/**
+ *	
+ * 
+ *	@param {} none
+ */
+Perceptron.prototype.drawPixels = function() {
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     context.clearRect(canvas.x, canvas.y, canvas.width, canvas.height);
-    for(var y = 0; y < GRID_HEIGHT; y++) {
-        for(var x = 0; x < GRID_WIDTH; x++) {
+    for(var y = 0; y < this.GRID_HEIGHT; y++) {
+        for(var x = 0; x < this.GRID_WIDTH; x++) {
             context.beginPath();
-            context.rect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+            context.rect(x * this.PIXEL_SIZE, y * this.PIXEL_SIZE, this.PIXEL_SIZE, this.PIXEL_SIZE);
 //                        context.rect(canvas.x + x*PIXEL_SIZE, canvas.y + y*PIXEL_SIZE, canvas.x + PIXEL_SIZE, canvas.y + PIXEL_SIZE);
 
             // couleur du pixel
-            if (pixels[x][y] >= 0.9) context.fillStyle = '#2D2';
-            if (pixels[x][y] < 0.9) context.fillStyle = '#2B2';
-            if (pixels[x][y] < 0.8) context.fillStyle = '#292';
-            if (pixels[x][y] < 0.7) context.fillStyle = '#272';
-            if (pixels[x][y] < 0.6) context.fillStyle = '#252';
-            if (pixels[x][y] < 0.5) context.fillStyle = '#555';
+            if (this.pixels[x][y] >= 0.9) context.fillStyle = '#2D2';
+            if (this.pixels[x][y] < 0.9)  context.fillStyle = '#2B2';
+            if (this.pixels[x][y] < 0.8)  context.fillStyle = '#292';
+            if (this.pixels[x][y] < 0.7)  context.fillStyle = '#272';
+            if (this.pixels[x][y] < 0.6)  context.fillStyle = '#252';
+            if (this.pixels[x][y] < 0.5)  context.fillStyle = '#555';
 
             context.fill();
         }
     }
 }
-
-$(document).ready(function() {
-    init();
-});
