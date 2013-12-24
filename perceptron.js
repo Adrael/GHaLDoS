@@ -185,19 +185,19 @@ Perceptron.prototype.updateGraphic = function() {
 }
 
 /**
- *	
- * 
- *	@param {} none
+ *
  */
 Perceptron.prototype.learnClicked = function() {
 	var component = document.getElementById("inputNumber");
 
+    var report = [];
     if(component.value.length === 0) {
     	alert("You have to enter a number first!");
     } else {
     	var learnedNumber = parseInt(component.value);
 	    this.learn(learnedNumber);
 	    this.processClicked();
+
 	}
 }
 
@@ -352,8 +352,7 @@ Perceptron.prototype.changeDataPixel = function(data) {
 
 /**
  *	
- * 
- *	@param {} none
+ *  @return {Array}
  */
 Perceptron.prototype.learnAllElements = function() {
 
@@ -435,7 +434,7 @@ Perceptron.prototype.showProcessedNumbers = function(processedNumbers) {
  *
  * @param {number} number - ...
  */
-Perceptron.prototype.learn = function(number) {
+Perceptron.prototype.learn = function (number) {
 
     var i, x, posX, posY;
     var size = this.GRID_WIDTH * this.GRID_HEIGHT;
