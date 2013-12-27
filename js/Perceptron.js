@@ -24,7 +24,7 @@ function Perceptron(input, output) {
     this.activation = [];
     this.processedNumbers = [];
     this.trainingReport = [];
-    this.floorValue = 0;
+    this.floorValue = -1;
 
     /**
      * Initialize all weight to O and reset the activation
@@ -65,7 +65,7 @@ function Perceptron(input, output) {
             for (var i = 0; i < this.nbrOfInput; i++) {
 
                 var E = input[i];
-                this.weight[i][i] += this.trainingRate * delta * E;
+                this.weight[i][o] += this.trainingRate * delta * E;
             }
         }
     };
@@ -91,7 +91,7 @@ function Perceptron(input, output) {
         }
 
         // TODO à sortir de la méthode
-        this.updateGraphic();
+//        this.updateGraphic();
     };
 
     /**
@@ -104,13 +104,14 @@ function Perceptron(input, output) {
      */
     this.learnAllInput = function (inputs) {
 
+        var MAX_ATTEMPT = 20;
         var nbrElementAApprendre = inputs.length;
         var number, id;
         var allCorrect = 0;
         var attempt = 0;
         this.trainingReport = [];
 
-        while (allCorrect < nbrElementAApprendre && attempt < 20) {
+        while (allCorrect < nbrElementAApprendre && attempt < MAX_ATTEMPT) {
 
             allCorrect = 0;
 
@@ -127,14 +128,11 @@ function Perceptron(input, output) {
                 }
             }
 
-            this.trainingReport.push({
-                "etape" : attempt,
-                "success" : (allCorrect / nbrElementAApprendre)
-            });
+            this.trainingReport.push([allCorrect / nbrElementAApprendre]);
             attempt++;
         }
 
-        if (attempt > 20)
-            console.log("sortie pas boucle infinit!");
+        if (attempt >= MAX_ATTEMPT)
+            console.log("echec de l'apprentissage après " + MAX_ATTEMPT + " tentatives!");
     };
 }

@@ -7,7 +7,7 @@
 function CanvasDisplay(canvas, x, y) {
     this.canvas = canvas;
 
-    var pixelNumber = {
+    this.pixelNumber = {
         x : x,
         y : y
     };
@@ -18,6 +18,8 @@ function CanvasDisplay(canvas, x, y) {
 
     this.thickness = 0;
     this.pixels = [];
+    this.lastMousePixelIndex = [];
+    this.writeMode = true;
 
     /**
      *  Returns the index of the pixel where the point belong
@@ -34,7 +36,7 @@ function CanvasDisplay(canvas, x, y) {
 
     /**
      *
-     *	@param {object} point - ...
+     *	@param {{x: number, y: number}} point - ...
      *  @param {int} value.
      */
     this.setPixelValueAtPoint = function(point, value) {
@@ -51,9 +53,9 @@ function CanvasDisplay(canvas, x, y) {
 
         this.pixels = [];
 
-        for (var x = 0; x < pixelNumber.x; x++) {
+        for (var x = 0; x < this.pixelNumber.x; x++) {
             this.pixels[x] = [];
-            for (var y = 0; y < pixelNumber.y; y++)
+            for (var y = 0; y < this.pixelNumber.y; y++)
                 this.pixels[x][y] = 0;
         }
 
@@ -66,9 +68,9 @@ function CanvasDisplay(canvas, x, y) {
     this.getPixelsValue = function () {
 
         var posX, posY, input = [];
-        for (var i = 0, size = pixelNumber.x * pixelNumber.y; i < size; i++) {
-            posX = i % pixelNumber.x;
-            posY = Math.floor(i / pixelNumber.x);
+        for (var i = 0, size = this.pixelNumber.x * this.pixelNumber.y; i < size; i++) {
+            posX = i % this.pixelNumber.x;
+            posY = Math.floor(i / this.pixelNumber.x);
             input[i] = this.pixels[posX][posY];
         }
         return input;
@@ -78,13 +80,13 @@ function CanvasDisplay(canvas, x, y) {
      * Copy the given matrix into the pixel matrix
      * @param newPixelsValues
      */
-    this.setPixelsValues = function (newPixelsValues) {
+    this.setPixelsValuesFromList = function (newPixelsValues) {
 
-        this.pixels = [];
-        for (var x = 0, sizeX = newPixelsValues.length; x < sizeX; x++) {
-            this.pixels[x] = [];
-            for (var y = 0, sizeY = newPixelsValues[x].length; y < sizeY; y++)
-                this.pixels[x][y] = newPixelsValues[x][y];
+        var i, posX, posY, size;
+        for (i = 0, size = newPixelsValues.length; i < size; i++) {
+            posX = i % this.pixelNumber.x;
+            posY = Math.floor(i / this.pixelNumber.x);
+            this.pixels[posX][posY] = newPixelsValues[i];
         }
     };
 
@@ -100,23 +102,18 @@ function CanvasDisplay(canvas, x, y) {
         if (this.pixels.length == 0)
             this.resetCanvas();
 
-        var writeMode = value > 0;
-        var absValue = Math.abs(value);
-        var coeffValue = Math.abs(value) / (2 * this.thickness);
+        var coeffValue = value / (2 * this.thickness);
 
-        if (this.pixels[x][y] + value > 0)
-            this.pixels[x][y] += value;
-        else
-            this.pixels[x][y] = 0;
+        this.pixels[x][y] = this.writeMode ? value : 0.0;
 
         for (var x2 = x - this.thickness, xMax = x + this.thickness; x2 < xMax; x2++) {
 
-            if (x2 < 0 || x2 >= pixelNumber.x)
+            if (x2 < 0 || x2 >= this.pixelNumber.x)
                 continue;
 
             for (var y2 = y - this.thickness, yMax = y + this.thickness; y2 < yMax; y2++) {
 
-                if (y2 < 0 || y2 >= pixelNumber.y)
+                if (y2 < 0 || y2 >= this.pixelNumber.y)
                     continue;
 
                 var deltaX = x2 - x;
@@ -126,15 +123,13 @@ function CanvasDisplay(canvas, x, y) {
                 if (dist > this.thickness)
                     continue;
 
-                var reviewedValue = absValue - (dist * coeffValue);
-
-                if (!writeMode)
-                    reviewedValue *= -1;
-
-                if (this.pixels[x2][y2] + reviewedValue > 0)
-                    this.pixels[x2][y2] += reviewedValue;
-                else
+                if (this.writeMode) {
+                    var reviewedValue = value - (dist * coeffValue);
+                    if (reviewedValue > this.pixels[x2][y2])
+                        this.pixels[x2][y2] = reviewedValue;
+                } else {
                     this.pixels[x2][y2] = 0;
+                }
             }
         }
     };
@@ -145,15 +140,18 @@ function CanvasDisplay(canvas, x, y) {
     this.drawPixels = function() {
 
         var context = this.canvas.getContext("2d");
-        context.clearRect(this.canvas.x, this.canvas.y, this.canvas.width, this.canvas.height);
+        context.fillStyle = '#555';
+//        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        context.rect(0, 0, this.canvas.width, this.canvas.height);
+        context.fill();
 
-        for(var y = 0; y < this.canvas.height; y++) {
-            for(var x = 0; x < this.canvas.width; x++) {
+        for(var y = 0; y < this.pixelNumber.y; y++) {
+            for(var x = 0; x < this.pixelNumber.x; x++) {
                 context.beginPath();
                 context.rect(x * pixelSize.x, y * pixelSize.y, pixelSize.x, pixelSize.y);
 
                 // couleur du pixel
-                if (this.pixels[x][y] >= 0.9) context.fillStyle = '#2D2';
+                context.fillStyle = '#2D2';
                 if (this.pixels[x][y] < 0.9)  context.fillStyle = '#2B2';
                 if (this.pixels[x][y] < 0.8)  context.fillStyle = '#292';
                 if (this.pixels[x][y] < 0.7)  context.fillStyle = '#272';
@@ -164,4 +162,17 @@ function CanvasDisplay(canvas, x, y) {
             }
         }
     };
+
+    /**
+     *
+     * @param {_events} e
+     * @returns {{x: number, y: number}}
+     */
+    this.mouseCanvasPosition = function(e) {
+        var rect = this.canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        };
+    }
 }

@@ -123,7 +123,19 @@
                             <h3 class="panel-title">Output values</h3>
                         </div>
                         <div class="panel-body">
-                            <div id="chartContainer" style="width: 100%;"></div>
+                            <div id="chartContainerOutput" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Training report</h3>
+                        </div>
+                        <div class="panel-body">
+                            <div id="chartContainerTrainingReport" style="width: 100%;"></div>
                         </div>
                     </div>
                 </div>
@@ -134,16 +146,10 @@
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
         <script type="text/javascript" src="http://code.highcharts.com/highcharts.js"></script>
         <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="perceptron.js"></script>
+        <script type="text/javascript" src="js/Perceptron.js"></script>
+        <script type="text/javascript" src="js/CanvasDisplay.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
 
-        <script type="text/javascript">
-
-			$(document).ready(function() {
-				var p = new Perceptron();
-				p.initialize();
-			});
-
-        </script>
 
     </body>
 </html>
