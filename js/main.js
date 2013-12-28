@@ -81,81 +81,86 @@ $(document).ready(function() {
                 result.push(i);
         }
         document.getElementById("outputNumber").value = result.join(", ");
-
         updateGraphic(perceptron.activation);
-        console.log(perceptron.activation);
     };
 
     document.getElementById("learnAllElements").onclick = function() {
         perceptron.learnAllInput(canvasHistoric);
-        // TODO ici la fonction pour mettre à jour le graphique (rapport d'apprentissage)
         updateGraphicTraining(perceptron.trainingReport);
-        console.log(perceptron.trainingReport);
     };
 
     document.getElementById("saveNumberClicked").onclick = function() {
         var component = document.getElementById("inputNumber");
         var learnedNumber = parseInt(component.value);
-        var id = idSave;
-        idSave++;
 
-        canvasHistoric.push({
-            'id' : id,
-            'number' : learnedNumber,
-            'table' : canvasDisplay.getPixelsValue()
-        });
+        if (! isNaN(learnedNumber)) {
 
-        var element_liste = document.createElement('div');
-        var div_row = document.createElement('div');
-        var div_text = document.createElement('div');
-        var div_group = document.createElement('div');
-        var button = document.createElement('button');
-        var button_span = document.createElement('span');
+            var id = idSave;
+            idSave++;
 
-        button_span.className = 'glyphicon glyphicon-remove';
+            var data = {
+                'id' : id,
+                'number' : learnedNumber,
+                'table' : canvasDisplay.getPixelsValue()
+            };
 
-        button.className = 'btn btn-danger btn-xs';
-        button.type = 'button';
+            canvasHistoric.push(data);
 
-        // suppression de l'enregistrement
-        button.onclick = function(e) {
+            var element_liste = document.createElement('div');
+            var div_row = document.createElement('div');
+            var div_text = document.createElement('div');
+            var div_group = document.createElement('div');
+            var button = document.createElement('button');
+            var button_span = document.createElement('span');
 
-            canvasHistoric[id]['table'] = [];
-            document.getElementById('save_' + id).remove();
+            button_span.className = 'glyphicon glyphicon-remove';
 
+            button.className = 'btn btn-danger btn-xs';
+            button.type = 'button';
+
+            // suppression de l'enregistrement
+            button.onclick = function(e) {
+
+                canvasHistoric = canvasHistoric.filter(function (save) {
+                    return (save['id'] !== id)
+                });
+
+                document.getElementById('save_' + id).remove();
+
+                updateListCount();
+
+                e.stopPropagation();
+            };
+
+            button.appendChild(button_span);
+
+            div_text.className = 'col-md-8 pull-left';
+            div_text.innerHTML = learnedNumber.toString();
+
+            div_group.className = 'col-md-4 pull-right text-right';
+            div_group.appendChild(button);
+
+            div_row.className = 'row';
+            div_row.appendChild(div_text);
+            div_row.appendChild(div_group);
+
+            element_liste.id = 'save_' + id;
+            element_liste.setAttribute('data-number-save', learnedNumber.toString());
+            element_liste.setAttribute('data-id-save', id.toString());
+            element_liste.className = 'list-group-item';
+            element_liste.style.cursor = "pointer";
+            element_liste.appendChild(div_row);
+            element_liste.onclick = function() {
+                canvasDisplay.setPixelsValuesFromList(data['table']);
+                canvasDisplay.drawPixels();
+                perceptron.processInput(data['table']);
+                updateGraphic(perceptron.activation);
+                console.log(perceptron.activation);
+            };
+
+            document.getElementById('listOfNumbers').appendChild(element_liste);
             updateListCount();
-
-            e.stopPropagation();
-        };
-
-        button.appendChild(button_span);
-
-        div_text.className = 'col-md-8 pull-left';
-        div_text.innerHTML = learnedNumber.toString();
-
-        div_group.className = 'col-md-4 pull-right text-right';
-        div_group.appendChild(button);
-
-        div_row.className = 'row';
-        div_row.appendChild(div_text);
-        div_row.appendChild(div_group);
-
-        element_liste.id = 'save_' + id;
-        element_liste.setAttribute('data-number-save', learnedNumber.toString());
-        element_liste.setAttribute('data-id-save', id.toString());
-        element_liste.className = 'list-group-item';
-        element_liste.style.cursor = "pointer";
-        element_liste.appendChild(div_row);
-        element_liste.onclick = function() {
-            canvasDisplay.setPixelsValuesFromList(canvasHistoric[id]['table']);
-            canvasDisplay.drawPixels();
-            perceptron.processInput(canvasHistoric[id]['table']);
-            updateGraphic(perceptron.activation);
-            console.log(perceptron.activation);
-        };
-
-        document.getElementById('listOfNumbers').appendChild(element_liste);
-        updateListCount();
+        }
     };
 
     var activationSlider = document.getElementById('activation_slider');
@@ -169,6 +174,7 @@ $(document).ready(function() {
     activationSlider.onchange = function() {
         perceptron.activationThreshold = activationSlider.value;
         document.getElementById('activation_display').innerHTML = activationSlider.value;
+        updateGraphic(perceptron.activation);
     };
 
     var nbrPixel = canvasDisplay.pixelNumber.x * canvasDisplay.pixelNumber.y;
@@ -261,6 +267,4 @@ $(document).ready(function() {
             data: data
         }, true);
     }
-
-
 });

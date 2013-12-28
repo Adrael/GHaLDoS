@@ -104,9 +104,11 @@ function Perceptron(input, output) {
      */
     this.learnAllInput = function (inputs) {
 
+
         var MAX_ATTEMPT = 20;
         var nbrElementAApprendre = inputs.length;
         var number, id;
+        var table;
         var allCorrect = 0;
         var attempt = 0;
         this.trainingReport = [];
@@ -119,10 +121,11 @@ function Perceptron(input, output) {
 
                 number = inputs[i]['number'];
                 id = inputs[i]['id'];
-                this.processInput(inputs[id]['table']);
+                table = inputs[i]['table'];
+                this.processInput(table);
 
                 if (this.processedNumbers.length != 1 || this.processedNumbers[0] != number) {
-                    this.learnInput(inputs[id]['table'], number);
+                    this.learnInput(table, number);
                 } else {
                     allCorrect++;
                 }
