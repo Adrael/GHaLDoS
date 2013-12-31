@@ -145,22 +145,39 @@ function CanvasDisplay(canvas, x, y) {
         context.rect(0, 0, this.canvas.width, this.canvas.height);
         context.fill();
 
+        var alpha;
         for(var y = 0; y < this.pixelNumber.y; y++) {
             for(var x = 0; x < this.pixelNumber.x; x++) {
                 context.beginPath();
                 context.rect(x * pixelSize.x, y * pixelSize.y, pixelSize.x, pixelSize.y);
 
+                alpha = 1 - (1 - this.pixels[x][y]) * 1.6;
                 // couleur du pixel
-                context.fillStyle = '#2D2';
-                if (this.pixels[x][y] < 0.9)  context.fillStyle = '#2B2';
-                if (this.pixels[x][y] < 0.8)  context.fillStyle = '#292';
-                if (this.pixels[x][y] < 0.7)  context.fillStyle = '#272';
-                if (this.pixels[x][y] < 0.6)  context.fillStyle = '#252';
+                context.fillStyle = 'rgba(35, 255, 35, ' + alpha + ')';
                 if (this.pixels[x][y] < 0.5)  context.fillStyle = '#555';
 
                 context.fill();
             }
         }
+
+        context.strokeStyle = 'rgba(100, 100, 100, 1)';
+        var i, linePosition;
+        for (i = 1; i < this.pixelNumber.y; i++) {
+            linePosition = pixelSize.y * i;
+            context.beginPath();
+            context.moveTo(0, linePosition);
+            context.lineTo(canvas.width, linePosition);
+            context.stroke();
+        }
+
+        for (i = 1; i < this.pixelNumber.x; i++) {
+            linePosition = pixelSize.x * i;
+            context.beginPath();
+            context.moveTo(linePosition, 0);
+            context.lineTo(linePosition, canvas.height);
+            context.stroke();
+        }
+
     };
 
     /**
