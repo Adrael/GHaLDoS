@@ -6,8 +6,8 @@
  */
 $(document).ready(function() {
 
-    var NBR_PIXEL_X = 15;
-    var NBR_PIXEL_Y = 20;
+    var NBR_PIXEL_X = 30;
+    var NBR_PIXEL_Y = 35;
     var VALUE = 1.0;
     var mousePressed = false;
     var idSave = 0;
