@@ -24,7 +24,7 @@ function Perceptron(input, output) {
     this.activation = [];
     this.processedNumbers = [];
     this.trainingReport = [];
-    this.floorValue = -1;
+    this.floorValue = 0;
 
     /**
      * Initialize all weight to O and reset the activation
@@ -89,9 +89,6 @@ function Perceptron(input, output) {
             if (this.activation[i] >= this.activationThreshold)
                 this.processedNumbers.push(i);
         }
-
-        // TODO à sortir de la méthode
-//        this.updateGraphic();
     };
 
     /**
@@ -103,7 +100,6 @@ function Perceptron(input, output) {
      * @param {Array} inputs
      */
     this.learnAllInput = function (inputs) {
-
 
         var MAX_ATTEMPT = 20;
         var nbrElementAApprendre = inputs.length;

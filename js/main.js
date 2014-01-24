@@ -6,8 +6,8 @@
  */
 $(document).ready(function() {
 
-    var NBR_PIXEL_X = 15;
-    var NBR_PIXEL_Y = 20;
+    var NBR_PIXEL_X = 30;
+    var NBR_PIXEL_Y = 35;
     var VALUE = 1.0;
     var mousePressed = false;
     var idSave = 0;
@@ -166,6 +166,8 @@ $(document).ready(function() {
     var activationSlider = document.getElementById('activation_slider');
     var trainingSlider   = document.getElementById('training_slider');
     var thicknessSlider  = document.getElementById('thickness_slider');
+    var pixelSliderX  = document.getElementById('pixel_sliderX');
+    var pixelSliderY  = document.getElementById('pixel_sliderY');
 
     activationSlider.min = 0.2;
     activationSlider.max = 1;
@@ -196,9 +198,33 @@ $(document).ready(function() {
         document.getElementById('thickness_display').innerHTML = thicknessSlider.value;
     };
 
+    pixelSliderX.min = 2;
+    pixelSliderX.max = NBR_PIXEL_X;
+    pixelSliderX.step = 1;
+    pixelSliderX.value = NBR_PIXEL_X;
+    pixelSliderX.onchange = function() {
+        NBR_PIXEL_X =  pixelSliderX.value;
+        canvasDisplay = new CanvasDisplay(canvas, NBR_PIXEL_X, NBR_PIXEL_Y);
+        canvasDisplay.resetCanvas();
+        document.getElementById('pixel_displayX').innerHTML = pixelSliderX.value;
+    };
+
+    pixelSliderY.min = 2;
+    pixelSliderY.max = NBR_PIXEL_Y;
+    pixelSliderY.step = 1;
+    pixelSliderY.value = NBR_PIXEL_Y;
+    pixelSliderY.onchange = function() {
+        NBR_PIXEL_Y =  pixelSliderY.value;
+        canvasDisplay = new CanvasDisplay(canvas, NBR_PIXEL_X, NBR_PIXEL_Y);
+        canvasDisplay.resetCanvas();
+        document.getElementById('pixel_displayY').innerHTML = pixelSliderY.value;
+    };
+
     document.getElementById('activation_display').innerHTML = perceptron.activationThreshold.toString();
     document.getElementById('training_display').innerHTML = perceptron.trainingRate.toString();
     document.getElementById('thickness_display').innerHTML = canvasDisplay.thickness.toString();
+    document.getElementById('pixel_displayX').innerHTML = NBR_PIXEL_X.toString();
+    document.getElementById('pixel_displayY').innerHTML = NBR_PIXEL_Y.toString();
 
     $("#pen_mode input").change(function() {
         canvasDisplay.writeMode = document.getElementById("pen_write").checked;

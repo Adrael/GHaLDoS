@@ -1,10 +1,27 @@
 body {
-	background:url(background.jpg) #A98436 no-repeat left top;
-	background-size: 100%;
+	background:url(background.jpg) no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+small.subtitle {
+	color: lightgray;
+	text-shadow: 1px 1px 5px black;
 }
 
 canvas#canvas:hover {
     cursor: crosshair;
+}
+
+canvas#canvas {
+	margin-top: 50px;
+}
+
+div#canvas_buttons {
+	margin-top: 32px;
+	margin-bottom: 50px;
 }
 
 .container .page-header h1 small {
