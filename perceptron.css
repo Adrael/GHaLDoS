@@ -1,5 +1,4 @@
 body {
-<<<<<<< HEAD
 	background:url(background.jpg) no-repeat center center fixed; 
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
@@ -10,10 +9,6 @@ body {
 small.subtitle {
 	color: lightgray;
 	text-shadow: 1px 1px 5px black;
-=======
-	background:url(background.jpg) #A98436 no-repeat left top fixed;
-	/*background-size: 100%;*/
->>>>>>> fdf0326cce5e8cc85311ce96cfc745d4403ca7e4
 }
 
 canvas#canvas:hover {
